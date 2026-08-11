@@ -1,3 +1,12 @@
-上传 GitHub 后先确认默认分支为 main，并在 Actions 手动运行一次 Update Shadowrocket custom config。
-第一次运行会执行单元测试、拉取 Johnshall release 上游并校验生成文件。
-成功后会把 OWNER/REPO 占位 update-url 换成该仓库自己的 Raw URL；Shadowrocket 订阅生成的 sr_top500_custom.conf。
+TailRocket 首次使用
+
+1. 打开 README.md，先选择一个 profiles/*.conf 的 Pages 订阅地址。
+2. 在 Shadowrocket → 配置 → 右上角 + 中粘贴地址并下载，不需要手动保存 conf 文件。
+3. 普通出海用户建议从 sr_top500_banlist.conf 开始；需要广告过滤时选择同名 _ad 版本。
+4. 如果 Pages 尚未部署，临时使用 README 中对应的 raw.githubusercontent.com 地址。
+5. GitHub Actions 每 6 小时检查 Johnshall release 上游；客户端仍需刷新远程配置。
+
+兼容旧地址：
+https://seanyim.github.io/tailrocket/sr_top500_custom.conf
+
+请不要把代理节点、订阅令牌、Tailnet 身份或个人凭据提交到 Public 仓库。

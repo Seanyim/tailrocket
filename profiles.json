@@ -1,0 +1,135 @@
+{
+  "upstream": {
+    "repository": "Johnshall/Shadowrocket-ADBlock-Rules-Forever",
+    "branch": "release",
+    "raw_base": "https://raw.githubusercontent.com/Johnshall/Shadowrocket-ADBlock-Rules-Forever/release"
+  },
+  "profiles": [
+    {
+      "name": "lazy.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "PROXY",
+      "ads": false,
+      "title": "懒人配置",
+      "use": "开箱即用的常规分流配置"
+    },
+    {
+      "name": "lazy_group.conf",
+      "kind": "full",
+      "mode": "grouped",
+      "final": "PROXY",
+      "ads": false,
+      "title": "懒人配置（含策略组）",
+      "use": "保留 PayPal、Amazon 和地区策略组"
+    },
+    {
+      "name": "sr_ad_only.conf",
+      "kind": "fragment",
+      "mode": "none",
+      "final": null,
+      "ads": true,
+      "title": "仅去广告规则",
+      "use": "与其他 Shadowrocket 配置组合使用"
+    },
+    {
+      "name": "sr_adb.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "DIRECT",
+      "ads": true,
+      "title": "旧版黑名单兼容配置",
+      "use": "兼容上游历史订阅，通常优先选择 sr_top500_banlist"
+    },
+    {
+      "name": "sr_backcn.conf",
+      "kind": "full",
+      "mode": "none",
+      "final": "DIRECT",
+      "ads": false,
+      "title": "回国规则",
+      "use": "中国网站走代理，海外网站直连"
+    },
+    {
+      "name": "sr_backcn_ad.conf",
+      "kind": "full",
+      "mode": "none",
+      "final": "DIRECT",
+      "ads": true,
+      "title": "回国规则 + 去广告",
+      "use": "中国网站走代理，海外网站直连并过滤广告"
+    },
+    {
+      "name": "sr_cnip.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "PROXY",
+      "ads": false,
+      "title": "国内外划分",
+      "use": "中国网站直连，海外网站代理"
+    },
+    {
+      "name": "sr_cnip_ad.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "PROXY",
+      "ads": true,
+      "title": "国内外划分 + 去广告",
+      "use": "中国网站直连，海外网站代理并过滤广告"
+    },
+    {
+      "name": "sr_direct_banad.conf",
+      "kind": "full",
+      "mode": "none",
+      "final": "DIRECT",
+      "ads": true,
+      "title": "全局直连 + 去广告",
+      "use": "全部请求直连，仅承担广告过滤"
+    },
+    {
+      "name": "sr_proxy_banad.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "PROXY",
+      "ads": true,
+      "title": "全局代理 + 去广告",
+      "use": "局域网直连，其余请求代理并过滤广告"
+    },
+    {
+      "name": "sr_top500_banlist.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "DIRECT",
+      "ads": false,
+      "title": "黑名单规则",
+      "use": "推荐的轻量常规配置，未知网站默认直连"
+    },
+    {
+      "name": "sr_top500_banlist_ad.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "DIRECT",
+      "ads": true,
+      "title": "黑名单规则 + 去广告",
+      "use": "黑名单分流并过滤广告"
+    },
+    {
+      "name": "sr_top500_whitelist.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "PROXY",
+      "ads": false,
+      "title": "白名单规则",
+      "use": "已知可直连网站直连，未知网站默认代理"
+    },
+    {
+      "name": "sr_top500_whitelist_ad.conf",
+      "kind": "full",
+      "mode": "proxy",
+      "final": "PROXY",
+      "ads": true,
+      "title": "白名单规则 + 去广告",
+      "use": "白名单分流并过滤广告"
+    }
+  ]
+}
