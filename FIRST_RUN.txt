@@ -1,0 +1,3 @@
+上传 GitHub 后先确认默认分支为 main，并在 Actions 手动运行一次 Update Shadowrocket custom config。
+第一次运行会执行单元测试、拉取 Johnshall release 上游并校验生成文件。
+成功后会把 OWNER/REPO 占位 update-url 换成该仓库自己的 Raw URL；Shadowrocket 订阅生成的 sr_top500_custom.conf。
