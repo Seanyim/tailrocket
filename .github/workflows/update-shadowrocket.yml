@@ -1,4 +1,4 @@
-name: Update Shadowrocket custom config
+name: Update TailRocket profiles
 
 on:
   workflow_dispatch:
@@ -9,13 +9,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: shadowrocket-custom-config
+  group: tailrocket-profile-update
   cancel-in-progress: true
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Checkout default branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -27,30 +27,33 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Test and rebuild complete config
+      - name: Test and rebuild all upstream profiles
         env:
-          UPSTREAM_URL: "https://raw.githubusercontent.com/Johnshall/Shadowrocket-ADBlock-Rules-Forever/release/sr_top500_banlist.conf"
-          UPDATE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/sr_top500_custom.conf"
+          PAGES_BASE: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
+          echo "Running TailRocket unit tests..."
           python -m unittest discover -s tests -v
-          python scripts/build_config.py \
-            --upstream "$UPSTREAM_URL" \
+          echo "Discovering the upstream release profile set and rebuilding atomically..."
+          python scripts/build_profiles.py \
+            --manifest profiles.json \
             --rules custom_rules.conf \
-            --output sr_top500_custom.conf \
-            --update-url "$UPDATE_URL"
+            --output-dir profiles \
+            --alias-output sr_top500_custom.conf \
+            --pages-base "$PAGES_BASE"
 
-      - name: Commit only when generated config changed
+      - name: Commit only when generated profiles changed
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
-          if git diff --quiet -- sr_top500_custom.conf; then
-            echo "No generated config changes."
+          if git diff --quiet -- profiles sr_top500_custom.conf; then
+            echo "No generated profile changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add sr_top500_custom.conf
-          git commit -m "chore: update Shadowrocket custom config"
+          git add profiles sr_top500_custom.conf
+          git commit -m "chore: update TailRocket profiles"
           git push origin "HEAD:${DEFAULT_BRANCH}"
