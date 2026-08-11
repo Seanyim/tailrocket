@@ -121,36 +121,6 @@ def _next_section_index(lines: list[str], start: int) -> int:
     return len(lines)
 
 
-def _strip_tailscale_rule(custom_rules: str) -> list[str]:
-    """Keep old custom_rules.conf files compatible while owning the route here."""
-
-    lines = _normalise_lines(custom_rules)
-    count = sum(line.strip() == TAILSCALE_RULE for line in lines)
-    if count > 1:
-        raise ValueError("custom rules violate exactly one Tailscale IPv4 rule")
-    return [line for line in lines if line.strip() != TAILSCALE_RULE]
-
-
-def _rule_lines(custom_rules: str, mode: str) -> list[str]:
-    lines = _strip_tailscale_rule(custom_rules)
-    if mode not in {"proxy", "grouped", "none"}:
-        raise ValueError(f"unknown custom rule mode: {mode}")
-    if mode == "none":
-        return []
-    if mode == "proxy":
-        return lines
-
-    rewritten: list[str] = []
-    for line in lines:
-        if line.startswith("DOMAIN-SUFFIX,") and line.endswith(",PROXY"):
-            if line.casefold().startswith("domain-suffix,paypal.com,"):
-                line = line[:-len(",PROXY")] + ",PayPal"
-            elif line.casefold().startswith("domain-suffix,amazon.com,"):
-                line = line[:-len(",PROXY")] + ",Amazon"
-        rewritten.append(line)
-    return rewritten
-
-
 def _clean_rule_prefix(lines: list[str]) -> list[str]:
     output = list(lines)
     while output and not output[0].strip():
@@ -165,9 +135,7 @@ def _expected_final(final_policy: str) -> str:
 def validate_config(
     text: str,
     update_url: str,
-    custom_rules: str,
     *,
-    custom_mode: str = "proxy",
     final_policy: str = "DIRECT",
     required_sections: tuple[str, ...] = REQUIRED_SECTIONS,
 ) -> None:
@@ -200,24 +168,21 @@ def validate_config(
 
     if rules.count(TAILSCALE_RULE) != 1:
         raise ValueError("generated config must contain exactly one Tailscale IPv4 rule")
-    effective_custom = _rule_lines(custom_rules, custom_mode)
     rule_body = _clean_rule_prefix(rules)
-    expected_prefix = [TAILSCALE_RULE] + effective_custom
+    expected_prefix = [TAILSCALE_RULE]
     if rule_body[: len(expected_prefix)] != expected_prefix:
-        raise ValueError("generated custom rules are not at the top of [Rule]")
+        raise ValueError("generated Tailscale rule is not the first effective [Rule] entry")
     if not any(line.strip().casefold() == _expected_final(final_policy) for line in rules):
         raise ValueError(f"generated config lost the upstream {final_policy} final rule")
 
 
 def patch(
     src: str,
-    custom_rules: str,
     update_url: str,
     *,
-    custom_mode: str = "proxy",
     final_policy: str = "DIRECT",
 ) -> str:
-    """Patch one complete config; the original three-argument CLI remains valid."""
+    """Patch one complete config while preserving the upstream rule order."""
 
     lines = _normalise_lines(src)
     _validate_upstream(src)
@@ -247,10 +212,10 @@ def patch(
         "# Derived from Johnshall/Shadowrocket-ADBlock-Rules-Forever (release).",
         "# IPv6: ON; IPv6 preferred: ON; DNS: system DNS.",
         "# Tailscale: validated minimal IPv4 routing; no forced TUN route or DERP.",
+        "# Upstream routing rules remain in their original order.",
         "# ============================================================================",
         "",
     ]
-    custom = _rule_lines(custom_rules, custom_mode)
     output = "\n".join(
         before_general
         + banner
@@ -259,13 +224,11 @@ def patch(
         + between_general_and_rule
         + ["[Rule]", ""]
     )
-    output += "\n".join([TAILSCALE_RULE] + custom + [""] + tail)
+    output += "\n".join([TAILSCALE_RULE, ""] + tail)
     output = output.rstrip() + "\n"
     validate_config(
         output,
         update_url,
-        custom_rules,
-        custom_mode=custom_mode,
         final_policy=final_policy,
     )
     return output
@@ -289,20 +252,15 @@ def patch_fragment(src: str) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--upstream", required=True)
-    parser.add_argument("--rules", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--update-url", required=True)
-    parser.add_argument("--custom-mode", choices=("proxy", "grouped", "none"), default="proxy")
     parser.add_argument("--final-policy", choices=("DIRECT", "PROXY"), default="DIRECT")
     args = parser.parse_args()
 
     source = fetch(args.upstream)
-    rules = Path(args.rules).read_text(encoding="utf-8")
     output = patch(
         source,
-        rules,
         args.update_url,
-        custom_mode=args.custom_mode,
         final_policy=args.final_policy,
     )
     Path(args.output).write_text(output, encoding="utf-8")

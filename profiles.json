@@ -8,7 +8,6 @@
     {
       "name": "lazy.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "PROXY",
       "ads": false,
       "title": "懒人配置",
@@ -17,7 +16,6 @@
     {
       "name": "lazy_group.conf",
       "kind": "full",
-      "mode": "grouped",
       "final": "PROXY",
       "ads": false,
       "title": "懒人配置（含策略组）",
@@ -26,7 +24,6 @@
     {
       "name": "sr_ad_only.conf",
       "kind": "fragment",
-      "mode": "none",
       "final": null,
       "ads": true,
       "title": "仅去广告规则",
@@ -35,7 +32,6 @@
     {
       "name": "sr_adb.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "DIRECT",
       "ads": true,
       "title": "旧版黑名单兼容配置",
@@ -44,7 +40,6 @@
     {
       "name": "sr_backcn.conf",
       "kind": "full",
-      "mode": "none",
       "final": "DIRECT",
       "ads": false,
       "title": "回国规则",
@@ -53,7 +48,6 @@
     {
       "name": "sr_backcn_ad.conf",
       "kind": "full",
-      "mode": "none",
       "final": "DIRECT",
       "ads": true,
       "title": "回国规则 + 去广告",
@@ -62,7 +56,6 @@
     {
       "name": "sr_cnip.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "PROXY",
       "ads": false,
       "title": "国内外划分",
@@ -71,7 +64,6 @@
     {
       "name": "sr_cnip_ad.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "PROXY",
       "ads": true,
       "title": "国内外划分 + 去广告",
@@ -80,7 +72,6 @@
     {
       "name": "sr_direct_banad.conf",
       "kind": "full",
-      "mode": "none",
       "final": "DIRECT",
       "ads": true,
       "title": "全局直连 + 去广告",
@@ -89,7 +80,6 @@
     {
       "name": "sr_proxy_banad.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "PROXY",
       "ads": true,
       "title": "全局代理 + 去广告",
@@ -98,7 +88,6 @@
     {
       "name": "sr_top500_banlist.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "DIRECT",
       "ads": false,
       "title": "黑名单规则",
@@ -107,7 +96,6 @@
     {
       "name": "sr_top500_banlist_ad.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "DIRECT",
       "ads": true,
       "title": "黑名单规则 + 去广告",
@@ -116,7 +104,6 @@
     {
       "name": "sr_top500_whitelist.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "PROXY",
       "ads": false,
       "title": "白名单规则",
@@ -125,7 +112,6 @@
     {
       "name": "sr_top500_whitelist_ad.conf",
       "kind": "full",
-      "mode": "proxy",
       "final": "PROXY",
       "ads": true,
       "title": "白名单规则 + 去广告",

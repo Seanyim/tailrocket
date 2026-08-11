@@ -26,13 +26,9 @@ class BuildProfilesTests(unittest.TestCase):
             },
         )
 
-    def test_manifest_keeps_semantic_modes_explicit(self):
+    def test_manifest_has_no_personal_rule_modes(self):
         manifest = build_profiles.load_manifest()
-        modes = {profile["name"]: profile["mode"] for profile in manifest["profiles"]}
-        self.assertEqual(modes["lazy_group.conf"], "grouped")
-        self.assertEqual(modes["sr_ad_only.conf"], "none")
-        self.assertEqual(modes["sr_backcn.conf"], "none")
-        self.assertEqual(modes["sr_top500_banlist.conf"], "proxy")
+        self.assertTrue(all("mode" not in profile for profile in manifest["profiles"]))
 
     def test_upstream_manifest_drift_fails_closed(self):
         manifest = build_profiles.load_manifest()
@@ -42,7 +38,7 @@ class BuildProfilesTests(unittest.TestCase):
                 build_profiles.upstream_conf_names(manifest) | {"new_profile.conf"},
             )
 
-    def test_grouped_overlay_preserves_named_groups(self):
+    def test_complete_profile_has_only_tailscale_overlay(self):
         source = """# source
 [General]
 ipv6 = false
@@ -54,20 +50,15 @@ FINAL,PROXY
 [URL Rewrite]
 [MITM]
 """
-        rules = """DOMAIN-SUFFIX,paypal.com,PROXY
-DOMAIN-SUFFIX,amazon.com,PROXY
-DOMAIN-SUFFIX,travel.example,PROXY
-"""
         output = build_config.patch(
             source,
-            rules,
             "https://pages.example/profiles/lazy_group.conf",
-            custom_mode="grouped",
             final_policy="PROXY",
         )
-        self.assertIn("DOMAIN-SUFFIX,paypal.com,PayPal", output)
-        self.assertIn("DOMAIN-SUFFIX,amazon.com,Amazon", output)
-        self.assertIn("DOMAIN-SUFFIX,travel.example,PROXY", output)
+        self.assertIn(build_config.TAILSCALE_RULE, output)
+        self.assertNotIn("paypal.com", output)
+        self.assertNotIn("amazon.com", output)
+        self.assertNotIn("travel.example", output)
 
     def test_fragment_stays_fragment(self):
         fragment = "[Rule]\nDOMAIN-SUFFIX,ads.example,REJECT\n"
