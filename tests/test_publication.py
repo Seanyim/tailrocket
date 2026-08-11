@@ -19,10 +19,12 @@ def section_end(lines, start):
 class PublicationTests(unittest.TestCase):
     def test_all_generated_profiles_are_present_and_linked(self):
         readme = (REPO / "README.md").read_text(encoding="utf-8")
+        index = (REPO / "index.html").read_text(encoding="utf-8")
         for profile in MANIFEST["profiles"]:
             path = REPO / "profiles" / profile["name"]
             self.assertTrue(path.exists(), profile["name"])
             self.assertIn(f"profiles/{profile['name']}", readme)
+            self.assertIn(f"profiles/{profile['name']}", index)
 
     def test_complete_profiles_have_network_overlay_in_general_section(self):
         for profile in MANIFEST["profiles"]:
