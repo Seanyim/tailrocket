@@ -38,7 +38,6 @@ jobs:
           echo "Discovering the upstream release profile set and rebuilding atomically..."
           python scripts/build_profiles.py \
             --manifest profiles.json \
-            --rules custom_rules.conf \
             --output-dir profiles \
             --alias-output sr_top500_custom.conf \
             --pages-base "$PAGES_BASE"

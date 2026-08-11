@@ -1,8 +1,8 @@
 TailRocket 首次使用
 
-1. 打开 README.md，先选择一个 profiles/*.conf 的 Pages 订阅地址。
+1. 打开 README.md，默认选择 sr_cnip.conf；需要广告过滤时选择 sr_cnip_ad.conf。
 2. 在 Shadowrocket → 配置 → 右上角 + 中粘贴地址并下载，不需要手动保存 conf 文件。
-3. 普通出海用户建议从 sr_top500_banlist.conf 开始；需要广告过滤时选择同名 _ad 版本。
+3. sr_cnip.conf 会让命中中国规则的请求直连，其余请求交给最终 PROXY；黑名单需求再选择 sr_top500_banlist.conf。
 4. 如果 Pages 尚未部署，临时使用 README 中对应的 raw.githubusercontent.com 地址。
 5. GitHub Actions 每 6 小时检查 Johnshall release 上游；客户端仍需刷新远程配置。
 

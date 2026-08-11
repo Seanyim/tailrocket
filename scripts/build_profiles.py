@@ -16,7 +16,6 @@ import build_config
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "profiles.json"
-DEFAULT_RULES = ROOT / "custom_rules.conf"
 ALIAS_SOURCE = "sr_top500_banlist.conf"
 ALIAS_NAME = "sr_top500_custom.conf"
 
@@ -31,15 +30,13 @@ def load_manifest(path: Path = DEFAULT_MANIFEST) -> dict[str, Any]:
         raise ValueError("every manifest profile must have a .conf name")
     if len(set(names)) != len(names):
         raise ValueError("profiles manifest contains duplicate names")
-    required = {"name", "kind", "mode", "title", "use", "ads"}
+    required = {"name", "kind", "title", "use", "ads"}
     for profile in profiles:
         missing = sorted(required - profile.keys())
         if missing:
             raise ValueError(f"profile {profile.get('name', '<unknown>')} is missing: {', '.join(missing)}")
         if profile["kind"] not in {"full", "fragment"}:
             raise ValueError(f"profile {profile['name']} has an unknown kind")
-        if profile["mode"] not in {"proxy", "grouped", "none"}:
-            raise ValueError(f"profile {profile['name']} has an unknown mode")
         if profile["kind"] == "full" and profile.get("final") not in {"DIRECT", "PROXY"}:
             raise ValueError(f"full profile {profile['name']} must declare DIRECT or PROXY final")
         if profile["kind"] == "fragment" and profile.get("final") is not None:
@@ -105,7 +102,6 @@ def _profile_url(base: str, name: str) -> str:
 
 def _write_stage(
     manifest: dict[str, Any],
-    rules_text: str,
     stage: Path,
     pages_base: str,
 ) -> dict[str, str]:
@@ -128,9 +124,7 @@ def _write_stage(
             update_url = _profile_url(pages_base, name)
             output = build_config.patch(
                 source,
-                rules_text,
                 update_url,
-                custom_mode=profile["mode"],
                 final_policy=profile["final"],
             )
         fetched[name] = source
@@ -141,7 +135,7 @@ def _write_stage(
     if alias_source is None:
         raise ValueError(f"alias source {ALIAS_SOURCE} is absent from the profile manifest")
     alias_url = f"{pages_base.rstrip('/')}/{ALIAS_NAME}"
-    alias_output = build_config.patch(alias_source, rules_text, alias_url, final_policy="DIRECT")
+    alias_output = build_config.patch(alias_source, alias_url, final_policy="DIRECT")
     (stage / ALIAS_NAME).write_text(alias_output, encoding="utf-8", newline="\n")
     generated[ALIAS_NAME] = alias_output
     return generated
@@ -166,7 +160,6 @@ def _replace_outputs(stage: Path, output_dir: Path, alias_output: Path) -> None:
 def build_all(
     *,
     manifest_path: Path = DEFAULT_MANIFEST,
-    rules_path: Path = DEFAULT_RULES,
     output_dir: Path | None = None,
     alias_output: Path | None = None,
     pages_base: str = "https://seanyim.github.io/tailrocket",
@@ -177,14 +170,13 @@ def build_all(
         output_dir = ROOT / "profiles"
     if alias_output is None:
         alias_output = ROOT / ALIAS_NAME
-    rules_text = rules_path.read_text(encoding="utf-8")
 
     if verify_upstream:
         validate_upstream_set(manifest, upstream_conf_names(manifest))
 
     with tempfile.TemporaryDirectory(prefix="tailrocket-build-", dir=str(ROOT.parent)) as temp_dir:
         stage = Path(temp_dir)
-        generated = _write_stage(manifest, rules_text, stage, pages_base)
+        generated = _write_stage(manifest, stage, pages_base)
         _replace_outputs(stage, output_dir, alias_output)
     return generated
 
@@ -192,7 +184,6 @@ def build_all(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument("--rules", type=Path, default=DEFAULT_RULES)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "profiles")
     parser.add_argument("--alias-output", type=Path, default=ROOT / ALIAS_NAME)
     parser.add_argument("--pages-base", required=True)
@@ -201,7 +192,6 @@ def main() -> None:
 
     generated = build_all(
         manifest_path=args.manifest,
-        rules_path=args.rules,
         output_dir=args.output_dir,
         alias_output=args.alias_output,
         pages_base=args.pages_base,

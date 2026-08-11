@@ -26,6 +26,12 @@ class PublicationTests(unittest.TestCase):
             self.assertIn(f"profiles/{profile['name']}", readme)
             self.assertIn(f"profiles/{profile['name']}", index)
 
+    def test_personal_domain_overlay_is_not_published(self):
+        self.assertFalse((REPO / "custom_rules.conf").exists())
+        for path in (REPO / "profiles").glob("*.conf"):
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn("# personal high-priority rules", text.casefold())
+
     def test_complete_profiles_have_network_overlay_in_general_section(self):
         for profile in MANIFEST["profiles"]:
             path = REPO / "profiles" / profile["name"]
@@ -52,7 +58,7 @@ class PublicationTests(unittest.TestCase):
         checked = [
             REPO / "README.md",
             REPO / "FIRST_RUN.txt",
-            REPO / "custom_rules.conf",
+            REPO / "index.html",
             REPO / "profiles.json",
             REPO / "scripts" / "build_config.py",
             REPO / "scripts" / "build_profiles.py",

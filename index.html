@@ -13,12 +13,13 @@
 </head>
 <body>
   <h1>TailRocket</h1>
-  <p>Shadowrocket 自动更新配置：IPv4 Tailscale 最小分流、IPv6 优先、系统 DNS，以及按配置用途适配的自定义规则。</p>
+  <p>Shadowrocket 自动更新配置：IPv4 Tailscale 最小分流、IPv6 优先、系统 DNS，以及完整保留上游用途的多配置版本。</p>
   <p>在 Shadowrocket 中进入 <strong>配置 → +</strong>，直接粘贴下面的 Pages 地址；不需要先下载文件。Pages 暂时不可用时，请使用 README 中对应的 Raw 地址。</p>
   <h2>推荐入口</h2>
   <ul>
+    <li><a href="profiles/sr_cnip.conf">sr_cnip：中国直连、其余代理（推荐）</a> — <code>profiles/sr_cnip.conf</code></li>
+    <li><a href="profiles/sr_cnip_ad.conf">sr_cnip + 去广告</a> — <code>profiles/sr_cnip_ad.conf</code></li>
     <li><a href="profiles/sr_top500_banlist.conf">黑名单（无广告）</a> — <code>profiles/sr_top500_banlist.conf</code></li>
-    <li><a href="profiles/sr_top500_banlist_ad.conf">黑名单 + 去广告</a> — <code>profiles/sr_top500_banlist_ad.conf</code></li>
     <li><a href="sr_top500_custom.conf">兼容入口 sr_top500_custom.conf</a></li>
   </ul>
   <h2>全部配置</h2>
