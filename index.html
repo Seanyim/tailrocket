@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TailRocket Shadowrocket 订阅</title>
+  <style>
+    body { max-width: 920px; margin: 2rem auto; padding: 0 1rem; font: 16px/1.6 system-ui, sans-serif; color: #1f2937; }
+    a { color: #0969da; }
+    code { background: #f1f5f9; padding: .12rem .3rem; border-radius: .25rem; }
+    li { margin: .35rem 0; }
+  </style>
+</head>
+<body>
+  <h1>TailRocket</h1>
+  <p>Shadowrocket 自动更新配置：IPv4 Tailscale 最小分流、IPv6 优先、系统 DNS，以及按配置用途适配的自定义规则。</p>
+  <p>在 Shadowrocket 中进入 <strong>配置 → +</strong>，直接粘贴下面的 Pages 地址；不需要先下载文件。Pages 暂时不可用时，请使用 README 中对应的 Raw 地址。</p>
+  <h2>推荐入口</h2>
+  <ul>
+    <li><a href="profiles/sr_top500_banlist.conf">黑名单（无广告）</a> — <code>profiles/sr_top500_banlist.conf</code></li>
+    <li><a href="profiles/sr_top500_banlist_ad.conf">黑名单 + 去广告</a> — <code>profiles/sr_top500_banlist_ad.conf</code></li>
+    <li><a href="sr_top500_custom.conf">兼容入口 sr_top500_custom.conf</a></li>
+  </ul>
+  <h2>全部配置</h2>
+  <ul>
+    <li><a href="profiles/lazy.conf">lazy.conf</a> · <a href="profiles/lazy_group.conf">lazy_group.conf</a></li>
+    <li><a href="profiles/sr_top500_banlist.conf">sr_top500_banlist.conf</a> · <a href="profiles/sr_top500_banlist_ad.conf">sr_top500_banlist_ad.conf</a></li>
+    <li><a href="profiles/sr_top500_whitelist.conf">sr_top500_whitelist.conf</a> · <a href="profiles/sr_top500_whitelist_ad.conf">sr_top500_whitelist_ad.conf</a></li>
+    <li><a href="profiles/sr_cnip.conf">sr_cnip.conf</a> · <a href="profiles/sr_cnip_ad.conf">sr_cnip_ad.conf</a></li>
+    <li><a href="profiles/sr_backcn.conf">sr_backcn.conf</a> · <a href="profiles/sr_backcn_ad.conf">sr_backcn_ad.conf</a></li>
+    <li><a href="profiles/sr_direct_banad.conf">sr_direct_banad.conf</a> · <a href="profiles/sr_proxy_banad.conf">sr_proxy_banad.conf</a></li>
+    <li><a href="profiles/sr_adb.conf">sr_adb.conf</a> · <a href="profiles/sr_ad_only.conf">sr_ad_only.conf</a></li>
+  </ul>
+  <p>详细用途、Raw 备用地址、自动更新、Tailscale SSH 边界、故障排查和许可说明请查看 <a href="https://github.com/Seanyim/tailrocket#readme">README.md</a>。</p>
+</body>
+</html>
