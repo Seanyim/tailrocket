@@ -8,6 +8,7 @@ import json
 import os
 import tempfile
 import urllib.request
+from urllib.parse import urlsplit
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,13 @@ def load_manifest(path: Path = DEFAULT_MANIFEST) -> dict[str, Any]:
     return data
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Fail closed rather than forwarding an API credential to a redirect target."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def _request_text(url: str, attempts: int = build_config.FETCH_ATTEMPTS) -> str:
     last_error: Exception | None = None
     for attempt in range(1, attempts + 1):
@@ -53,9 +61,17 @@ def _request_text(url: str, attempts: int = build_config.FETCH_ATTEMPTS) -> str:
                 headers={"User-Agent": "tailrocket-updater/5.0", "Accept": "application/json"},
             )
             token = os.environ.get("GITHUB_TOKEN")
-            if token:
+            parsed = urlsplit(url)
+            authenticated = bool(token) and (
+                parsed.scheme == "https" and parsed.hostname == "api.github.com"
+                and parsed.port in (None, 443) and parsed.username is None
+                and parsed.password is None
+            )
+            if authenticated:
                 request.add_header("Authorization", f"Bearer {token}")
-            with urllib.request.urlopen(request, timeout=45) as response:
+            # The Contents endpoint should not redirect. Never forward its bearer token.
+            opener = urllib.request.build_opener(_NoRedirect())
+            with opener.open(request, timeout=45) as response:
                 return response.read().decode("utf-8-sig")
         except (OSError, UnicodeDecodeError, ValueError) as error:
             last_error = error
