@@ -3,6 +3,8 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+import urllib.error
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -35,8 +37,55 @@ class BuildProfilesTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "not in manifest"):
             build_profiles.validate_upstream_set(
                 manifest,
-                build_profiles.upstream_conf_names(manifest) | {"new_profile.conf"},
+                {profile["name"] for profile in manifest["profiles"]} | {"new_profile.conf"},
             )
+
+    def test_missing_upstream_profile_fails_closed(self):
+        manifest = build_profiles.load_manifest()
+        names = {profile["name"] for profile in manifest["profiles"]}
+        names.pop()
+        with self.assertRaisesRegex(ValueError, "missing from upstream"):
+            build_profiles.validate_upstream_set(manifest, names)
+
+    def test_upstream_failure_leaves_outputs_untouched(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            output = root / "profiles"
+            output.mkdir()
+            sentinel = output / "old.conf"
+            sentinel.write_text("old")
+            alias = root / "alias.conf"
+            alias.write_text("old alias")
+            with patch.object(build_profiles, "upstream_conf_names", side_effect=RuntimeError("rate limited")), patch.object(build_profiles, "_write_stage") as stage:
+                with self.assertRaisesRegex(RuntimeError, "rate limited"):
+                    build_profiles.build_all(output_dir=output, alias_output=alias)
+                stage.assert_not_called()
+            self.assertEqual(sentinel.read_text(), "old")
+            self.assertEqual(alias.read_text(), "old alias")
+
+    def test_token_is_only_sent_to_https_github_api(self):
+        for url, allowed in [("https://api.github.com/repos/x/y/contents", True),
+                             ("https://example.com/", False),
+                             ("http://api.github.com/", False),
+                             ("https://api.github.com.evil.example/", False)]:
+            with self.subTest(url=url), patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}), patch.object(build_profiles.urllib.request, "build_opener") as factory:
+                factory.return_value.open.return_value.__enter__.return_value.read.return_value = b"[]"
+                build_profiles._request_text(url)
+                request = factory.return_value.open.call_args.args[0]
+                self.assertEqual(request.get_header("Authorization"), "Bearer test-token" if allowed else None)
+                self.assertIsInstance(factory.call_args.args[0], build_profiles._NoRedirect)
+
+    def test_redirect_is_refused(self):
+        handler = build_profiles._NoRedirect()
+        self.assertIsNone(handler.redirect_request(None, None, 302, "Found", {}, "https://example.com/"))
+
+    def test_fetch_failure_has_bounded_retries(self):
+        with patch.object(build_profiles.urllib.request, "build_opener") as factory, patch.object(build_config.time, "sleep") as sleep:
+            factory.return_value.open.side_effect = urllib.error.HTTPError("https://api.github.com/", 403, "rate limit exceeded", {}, None)
+            with self.assertRaisesRegex(RuntimeError, "after 3 attempts"):
+                build_profiles._request_text("https://api.github.com/", attempts=3)
+            self.assertEqual(factory.return_value.open.call_count, 3)
+            self.assertEqual([call.args[0] for call in sleep.call_args_list], [1, 2])
 
     def test_complete_profile_has_only_tailscale_overlay(self):
         source = """# source
